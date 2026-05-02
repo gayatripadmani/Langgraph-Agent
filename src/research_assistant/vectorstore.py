@@ -4,6 +4,7 @@ from pathlib import Path
 
 from langchain_core.documents import Document
 from langchain_qdrant import QdrantVectorStore
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pypdf import PdfReader
 from qdrant_client import QdrantClient, models
 
@@ -11,16 +12,11 @@ from research_assistant.config import CORPUS_DIR, Settings
 from research_assistant.llm import build_embeddings
 
 
-def chunk_text(text: str, *, chunk_size: int = 900, overlap: int = 120) -> list[str]:
-    chunks: list[str] = []
-    start = 0
-    while start < len(text):
-        end = min(len(text), start + chunk_size)
-        chunks.append(text[start:end].strip())
-        if end == len(text):
-            break
-        start = max(end - overlap, start + 1)
-    return [chunk for chunk in chunks if chunk]
+TEXT_SPLITTER = RecursiveCharacterTextSplitter(
+    chunk_size=18000,
+    chunk_overlap=800,
+    separators=["\n\n", "\n", ". ", " ", ""],
+)
 
 
 def list_pdf_files(corpus_dir: Path = CORPUS_DIR) -> list[Path]:
@@ -97,9 +93,7 @@ def load_corpus_documents(corpus_dir: Path = CORPUS_DIR) -> list[Document]:
             _build_page_windows(extracted_pages)
         ):
             page_title = window_text.splitlines()[0].strip() if window_text else title
-            for sub_idx, chunk in enumerate(
-                chunk_text(window_text, chunk_size=18000, overlap=800)
-            ):
+            for sub_idx, chunk in enumerate(TEXT_SPLITTER.split_text(window_text)):
                 if page_start == page_end:
                     page_reference = f"p. {page_start}"
                     chunk_id = f"{path.stem}-page-{page_start}-chunk-{sub_idx}"

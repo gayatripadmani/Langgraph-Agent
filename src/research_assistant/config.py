@@ -62,7 +62,7 @@ def load_settings() -> Settings:
         raise ValueError("Missing QDRANT_API_KEY in .env")
     return Settings(
         gemini_api_key=api_key,
-        chat_model=env_map.get("GEMINI_CHAT_MODEL", "models/gemini-2.5-flash-lite"),
+        chat_model=env_map.get("GEMINI_CHAT_MODEL", "models/gemini-2.5-flash"),
         embedding_model=env_map.get(
             "GEMINI_EMBEDDING_MODEL", "models/gemini-embedding-001"
         ),

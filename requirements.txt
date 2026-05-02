@@ -2,6 +2,7 @@ fastapi
 langchain
 langchain-google-genai
 langchain-qdrant
+langchain-text-splitters
 langgraph
 pydantic
 pypdf
